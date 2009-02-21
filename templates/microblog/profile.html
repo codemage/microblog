@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ user.username }} | Profile | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>{{ user.username }} -- Microblogging Demo</h1>
+{% endblock %}
+
+{% block content %}
+
+<ul>
+{% for entry in entries %}
+    <li>
+	<div>"{{ entry.content }}" -- {{ entry.post_date }}
+	     <a href="{% url microblog_entry_reply username=user.username, id=entry.id %}">Reply</a>
+	</div>
+	{% if entry.reply_to %}
+	    <div>(Reply to
+		 <a href="{% url microblog_entry username=entry.reply_to.owner.user.username, id=entry.reply_to.id %}">
+		 @{{ entry.reply_to.id }}</a>): "{{ entry.reply_to.content }}"</div>
+	{% endif %}
+	{% if entry.tags %}
+	    <div> Tags:
+	    {% for tag in entry.tags %}
+		{{ tag }}
+	    {% endfor %}
+	    </div>
+	{% endif %}
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
+

@@ -21,9 +21,10 @@ from django.conf.urls.defaults import *
 from microblog import views
 
 urlpatterns = patterns('',
-    (r'^users/(?P<username>.*)/friends/$', views.friends),
-    (r'^users/(?P<username>.*)/(?P<id>\d+)/$', views.showentry),
-    (r'^users/(?P<username>.*)/$', views.profile),
+    url(r'^users/(?P<username>.*)/friends/$', views.friends, name='microblog_friends'),
+    url(r'^users/(?P<username>.*)/(?P<id>\d+)/$', views.showentry, name='microblog_entry'),
+    url(r'^users/(?P<username>.*)/(?P<id>\d+)/reply$', views.showentry, name='microblog_entry_reply'),
+    url(r'^users/(?P<username>.*)/$', views.profile, name='microblog_profile'),
     (r'^post/$', views.postentry),
     (r'^$', views.index),
 )

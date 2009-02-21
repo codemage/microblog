@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+Post Entry | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>Microblog Demo -- Post New Entry</h1>
+{% endblock %}
+
+{% block content %}
+<form action="" method="POST">
+    <table>
+	{{form.as_table}}
+	<tr><td colspan="2"><input type="submit"/></td></tr>
+    </table>
+</form>
+{% endblock %}
+

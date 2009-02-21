@@ -16,17 +16,34 @@
     along with microblogging-demo.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from django.http import HttpResponse
+from datetime import datetime
+
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 
-from microblog.models import Entry
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
+from microblog.models import Profile, Entry
+from microblog.forms import PostEntryForm
 
 def profile(request, username):
-    user = get_object_or_404(User, username=username)
+    # parse request parameters
+    page = request.REQUEST.get('page', 1)
+    pagesize = request.REQUEST.get('pagesize', 40)
+    start = (page - 1)*pagesize
 
-    output = u'userpage for %s' % username
-    return HttpResponse(output)
+    # pull data
+    user = get_object_or_404(User, username=username)
+    profile = Profile.get_or_create(user)
+    entries = profile.entries.all()[start:start+pagesize]
+
+    context = {
+	'user': user,
+	'profile': profile,
+	'entries': entries,
+    }
+    return render_to_response('microblog/profile.html', context)
 
 def showentry(request, username, id):
     entry = get_object_or_404(Entry, owner_username=username, pk=id)
@@ -38,9 +55,25 @@ def friends(request, username):
     output = u'friends of %s' % username
     return HttpResponse(output)
 
+@login_required
 def postentry(request):
-    output = u'post entry'
-    return HttpResponse(output)
+    if request.method == 'POST':
+	form = PostEntryForm(request.POST)
+	if form.is_valid():
+	    profile = Profile.get_or_create(request.user)
+	    entry = Entry(owner=profile, content=form.cleaned_data['content'], post_date=datetime.now())
+	    entry.save()
+	    try:
+		entry.parse_post()
+		entry.save()
+	    except:
+		entry.delete()
+		raise
+	    return HttpResponseRedirect('/?posted=1')
+    else:
+	form = PostEntryForm()
+
+    return render_to_response('microblog/postentry.html', { 'form': form })
 
 def index(request):
     output = u'index'

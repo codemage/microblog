@@ -48,6 +48,9 @@ class Entry(models.Model):
     targets = models.ManyToManyField(Profile, related_name='targeted_entries')
     reply_to = models.ForeignKey('self', related_name='replies', null=True, blank=True, default=None)
 
+    def get_tags(self):
+	return Tag.objects.get_for_object(self)
+
     def parse_post(self):
 	''' parse_post(): Parse a post for @target and #tag syntax
 
@@ -68,7 +71,7 @@ class Entry(models.Model):
 			continue # TODO: spit error
 		    self.targets.add(user[0])
 	    elif word.startswith('#'):      # tag this entry
-		tagging.models.Tag.objects.add_tag(self, word[1:])
+		Tag.objects.add_tag(self, word[1:])
 	    elif keep == -1: # first non-special word is kept
 		keep = i
 	self.content = ' '.join(words[keep:])
@@ -78,6 +81,8 @@ class Entry(models.Model):
 
     class Meta(object):
 	verbose_name_plural = "entries"
+	ordering = ['-post_date']
+	get_latest_by = 'post_date'
 
 tagging.register(Entry)
 
