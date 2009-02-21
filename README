@@ -3,6 +3,13 @@ microblog
 
 This is a sample Django microblogging app.
 
+It's being built for demonstration at the local GNHLUG PySIG.
+
+This code is copyright (c) 2009 Walter Mundt, and is available
+for use under the GNU Affero General Public License, version 3 or later.
+
+See the file COPYING for license deails.
+
 -------------
 Prerequisites
 -------------
