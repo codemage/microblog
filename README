@@ -1,0 +1,16 @@
+microblog
+=========
+
+This is a sample Django microblogging app.
+
+-------------
+Prerequisites
+-------------
+
+To use this app, you will need:
+
+ * django 1.0 or later
+ * django-registration 0.7 or later
+ * django-tagging 0.3 or later
+   (or pre-0.3 dev checkout until 0.3 is released)
+
