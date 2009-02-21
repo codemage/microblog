@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ user.username }} | Profile | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>Microblogging Demo</h1>
+{% endblock %}
+
+{% block content %}
+
+<ul>
+    <li><a href={% url auth_login %}>Log in</a></li>
+    <li><a href={% url auth_password_reset %}>Reset Password</a></li>
+    <li><a href={% url registration_register %}>Register</a></li>
+</ul>
+{% endblock %}
+

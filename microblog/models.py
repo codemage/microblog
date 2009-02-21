@@ -26,7 +26,7 @@ from tagging.models import Tag
 import re
 
 class Profile(models.Model):
-    friends = models.ManyToManyField('self', related_name='friend_of', symmetrical='false')
+    followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
     user = models.OneToOneField(auth_models.User, related_name='microblog_profile')
 
     def __unicode__(self):
@@ -40,6 +40,9 @@ class Profile(models.Model):
 	    p = Profile(user=user)
 	    p.save()
 	    return p
+    
+    class Meta:
+	ordering = [ 'user__username' ]
 
 class Entry(models.Model):
     content = models.CharField(max_length=250)

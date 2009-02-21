@@ -20,12 +20,15 @@ from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
+from django.core import urlresolvers
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
+from tagging.models import Tag
+
 from microblog.models import Profile, Entry
-from microblog.forms import PostEntryForm
+from microblog.forms import PostEntryForm, FollowForm
 
 def profile(request, username):
     # parse request parameters
@@ -51,8 +54,8 @@ def showentry(request, username, id):
     output = u'entry %s by %s: "%s"' % (id, username, entry.content)
     return HttpResponse(output)
 
-def friends(request, username):
-    output = u'friends of %s' % username
+def watch(request, username):
+    output = u'feed for %s' % username
     return HttpResponse(output)
 
 @login_required
@@ -69,13 +72,53 @@ def postentry(request):
 	    except:
 		entry.delete()
 		raise
-	    return HttpResponseRedirect('/?posted=1')
+	    next = urlresolvers.reverse('microblog_index', kwargs={'posted': '1'})
+	    return HttpResponseRedirect(next + "?posted=1")
     else:
 	form = PostEntryForm()
 
     return render_to_response('microblog/postentry.html', { 'form': form })
 
-def index(request):
-    output = u'index'
+@login_required
+def watch_self(request):
+    output = u'feed for self'
     return HttpResponse(output)
+
+@login_required
+def follow(request):
+    context = {'results': []}
+    if request.method == 'POST':
+	form = FollowForm(request.POST)
+	if form.is_valid():
+	    own_profile = Profile.get_or_create(request.user)
+	    names = form.cleaned_data['users'].split(' ')
+	    newnames = []
+	    for name in names:
+		user = User.objects.filter(username=name)
+		if len(user) == 0:
+		    context['results'].append((name, 'No such user'))
+		    newnames.append(name)
+		else:
+		    profile = Profile.get_or_create(user[0])
+		    profile.followers.add(own_profile)
+		    context['results'].append((name, 'Now followed'))
+	    if len(newnames):
+		form = FollowForm({'users': ' '.join(newnames)})
+	    else:
+		form = FollowForm()
+    else:
+	form = FollowForm()
+
+    context['form'] = form
+    return render_to_response('microblog/follow.html', context)
+
+def index(request):
+    if request.user.is_authenticated():
+	context = {
+	    'profile': Profile.get_or_create(request.user),
+	    'user': request.user,
+	}
+	return render_to_response('microblog/index_user.html', context)
+    else:
+	return render_to_response('microblog/index_guest.html')
 

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ user.username }} | Home | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>Welcome, {{ user.username }} -- Microblogging Demo</h1>
+{% endblock %}
+
+{% block content %}
+
+<ul>
+    <li><a href="{% url microblog_watch_self %}">Your Feed</a></li>
+    <li><a href="{% url microblog_post %}">Post</a></li>
+    <li>{% if profile.following.count %}
+	    You're following:
+	    {% for fp in profile.following.all %}
+		{% spaceless %}
+		<a href="{% url microblog_profile username=fp.user.username %}">
+		    {{ fp.user.username }}</a>
+		{% if not forloop.last %}<span>,</span>{%endif%}
+		{% endspaceless %}
+	    {% endfor %} <br/>
+	    <a href="{% url microblog_follow %}">Follow More Users</a>
+	{% else %}
+	    You're not following anyone. <br/>
+	    <a href="{% url microblog_follow %}">Follow Some Users</a>
+	{% endif %}
+    </li>
+    <li>{% if profile.followers.count %}
+	The following people are following you:
+	    {% for fp in profile.followers.all %}
+		{% spaceless %}
+		<a href="{% url microblog_profile username=fp.user.username %}">
+		    {{ fp.user.username }}</a>
+		{% if not forloop.last %}<span>,</span>{%endif%}
+		{% endspaceless %}
+	    {% endfor %}
+	{% else %}
+	    You have no followers.
+	{% endif %}
+    </li>
+</ul>
+
+{% endblock %}
+
