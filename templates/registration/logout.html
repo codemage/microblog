@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}
+Log Out | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>Microblog Demo User Logged Out</h1>
+{% endblock %}
+
+{% block content %}
+You are not logged out.  <a href="{% url auth_login %}">Click here</a> to log in again.
+{% endblock %}

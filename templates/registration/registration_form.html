@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+Register | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+<h1>Microblog Demo User Registration</h1>
+{% endblock %}
+
+{% block content %}
+<form action="{% url registration_register %}" method="POST">
+    <table>
+	{{form.as_table}}
+	<tr><td colspan="2"><input type="submit"/></td></tr>
+    </table>
+</form>
+{% endblock %}
+

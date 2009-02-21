@@ -1,0 +1,13 @@
+The microblog demo site received a new account request from
+this e-mail address.  If you did not make this request, simply
+ignore this message.
+
+To activate your new account, click the link below within
+{{ expiration_days }} days.
+
+http://{{ site }}{% url registration_activate activation_key %}
+
+Regards,
+--
+Microblog demo administration
+

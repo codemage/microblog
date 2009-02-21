@@ -73,6 +73,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    ROOT + 'templates'
 )
 
 INSTALLED_APPS = (
@@ -80,15 +81,24 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.admin',
+    'django.contrib.admindocs',
     'registration',
     'tagging',
-    'microblog'
+    'microblog',
 )
+
+# E-mail settings
+EMAIL_HOST = 'toranin.info'
+EMAIL_SUBJECT_PREFIX = '[Microblog Demo] '
+DEFAULT_FROM_EMAIL = 'emage+microblog@spamcop.net'
+
+# Auth settings
+LOGIN_REDIRECT_URL = '/'
 
 # Registration settings
 ACCOUNT_ACTIVATION_DAYS = 3
 
 # Tagging settings
 FORCE_LOWERCASE_TAGS = True
-
 
