@@ -1,13 +1,12 @@
 {% load microblog_tags %}
 <ul>
-{% if entries.count %}
+{% if entries|length %}
     {% for entry in entries|fill_microblog_feed:user %}
 	<li>
 	    {% spaceless %}
 	    <div><a href="{% url microblog_profile username=entry.owner.user.username %}">{{ entry.owner.user.username }}</a>
 		 <span>{% if entry.to_you %} to you{% endif %}:</span>
 		 "{{ entry.content }}" -- {{ entry.post_date }}
-		 <a href="{% url microblog_entry_reply username=user.username, id=entry.id %}">Reply</a>
 	    </div>
 	    {% endspaceless %}
 	    {% if entry.reply_to %}

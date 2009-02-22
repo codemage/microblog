@@ -27,6 +27,8 @@ def fill_microblog_entry(entry, user):
     try:
         entry.replyform = microblog.forms.PostEntryForm(auto_id='reply%s_%%s' % entry.pk)
         entry.to_you = user.is_authenticated() and entry.targets.filter(user = user).count() > 0
+	if not hasattr(entry, 'highlight'):
+	    entry.highlight = False
     except:
 	print "Failure in fill_microblog:"
 	import traceback

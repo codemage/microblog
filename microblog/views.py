@@ -36,9 +36,21 @@ def feed(request, username):
 
 def showentry(request, username, id):
     entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
+    entry.highlight = True
 
-    output = u'entry %s by %s: "%s"' % (id, username, entry.content)
-    return HttpResponse(output)
+    parents = []
+    cur = entry
+    while cur.reply_to is not None:
+	cur = cur.reply_to
+	parents.append(cur)
+    parents.reverse()
+
+    context = {
+	'user': request.user,
+	'entry': entry,
+	'parents': parents
+    }
+    return render_to_response("microblog/show_entry.html", context)
 
 def reply(request, username, id):
     entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
@@ -82,7 +94,14 @@ def postentry(request, reply_to = None):
     else:
 	form = PostEntryForm()
 
-    return render_to_response('microblog/postentry.html', { 'form': form })
+    formaction = ""
+    title = "Post New Entry"
+    if reply_to is not None:
+	formaction = urlresolvers.reverse('microblog_entry_reply', kwargs=
+	    {'username': reply_to.owner.user.username, 'id': reply_to.id})
+	title = "Reply to Entry %s" % reply_to.id
+
+    return render_to_response('microblog/postentry.html', { 'form': form, 'formaction': formaction, 'title': title })
 
 @login_required
 def watch_self(request):
