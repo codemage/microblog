@@ -52,10 +52,6 @@ class Entry(models.Model):
     def get_tags(self):
 	return Tag.objects.get_for_object(self)
 
-    def replyform(self): # XXX hack
-	import microblog.forms
-	return microblog.forms.PostEntryForm(auto_id='reply%s_%%s' % self.pk)
-
     def parse_post(self):
 	''' parse_post(): Parse a post for @target and #tag syntax
 

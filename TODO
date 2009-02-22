@@ -1,0 +1,10 @@
+
+* Hide reply form until reply link clicked in entry list
+* User feed detail page
+* Pagination for entry list detail pages (feed and per-user)
+* Tagging stuff
+* XMPP interface
+* Link from activation completed to login or provide login form in-place (pre-fill username?)
+* Log out link on index
+* Global recent-activity feed on home page
+
