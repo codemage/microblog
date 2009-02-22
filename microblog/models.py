@@ -17,6 +17,7 @@
 """
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth import models as auth_models
 
 import tagging
@@ -29,18 +30,15 @@ class Profile(models.Model):
     followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
     user = models.OneToOneField(auth_models.User, related_name='microblog_profile')
 
+    def feed(self):
+	followed = Q(owner__followers = self)
+	replies = Q(reply_to__owner = self)
+	targeted = Q(targets = self)
+	return Entry.objects.filter(followed | replies | targeted)
+
     def __unicode__(self):
 	return u'%s' % self.user.username
 
-    @classmethod
-    def get_or_create(cls, user):
-	try:
-	    return user.microblog_profile
-	except cls.DoesNotExist:
-	    p = Profile(user=user)
-	    p.save()
-	    return p
-    
     class Meta:
 	ordering = [ 'user__username' ]
 
@@ -53,6 +51,10 @@ class Entry(models.Model):
 
     def get_tags(self):
 	return Tag.objects.get_for_object(self)
+
+    def replyform(self): # XXX hack
+	import microblog.forms
+	return microblog.forms.PostEntryForm(auto_id='reply%s_%%s' % self.pk)
 
     def parse_post(self):
 	''' parse_post(): Parse a post for @target and #tag syntax
@@ -72,7 +74,7 @@ class Entry(models.Model):
 		    users = Profile.objects.filter(user__username = word[1:])
 		    if len(users) == 0:
 			continue # TODO: spit error
-		    self.targets.add(user[0])
+		    self.targets.add(users[0])
 	    elif word.startswith('#'):      # tag this entry
 		Tag.objects.add_tag(self, word[1:])
 	    elif keep == -1: # first non-special word is kept

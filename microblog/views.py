@@ -30,6 +30,21 @@ from tagging.models import Tag
 from microblog.models import Profile, Entry
 from microblog.forms import PostEntryForm, FollowForm
 
+def feed(request, username):
+    output = u'feed for %s' % username
+    return HttpResponse(output)
+
+def showentry(request, username, id):
+    entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
+
+    output = u'entry %s by %s: "%s"' % (id, username, entry.content)
+    return HttpResponse(output)
+
+def reply(request, username, id):
+    entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
+
+    return postentry(request, entry)
+
 def profile(request, username):
     # parse request parameters
     page = request.REQUEST.get('page', 1)
@@ -38,7 +53,7 @@ def profile(request, username):
 
     # pull data
     user = get_object_or_404(User, username=username)
-    profile = Profile.get_or_create(user)
+    profile = Profile.objects.get_or_create(user=user)[0]
     entries = profile.entries.all()[start:start+pagesize]
 
     context = {
@@ -48,23 +63,13 @@ def profile(request, username):
     }
     return render_to_response('microblog/profile.html', context)
 
-def showentry(request, username, id):
-    entry = get_object_or_404(Entry, owner_username=username, pk=id)
-
-    output = u'entry %s by %s: "%s"' % (id, username, entry.content)
-    return HttpResponse(output)
-
-def watch(request, username):
-    output = u'feed for %s' % username
-    return HttpResponse(output)
-
 @login_required
-def postentry(request):
+def postentry(request, reply_to = None):
     if request.method == 'POST':
 	form = PostEntryForm(request.POST)
 	if form.is_valid():
-	    profile = Profile.get_or_create(request.user)
-	    entry = Entry(owner=profile, content=form.cleaned_data['content'], post_date=datetime.now())
+	    profile = Profile.objects.get_or_create(user=request.user)[0]
+	    entry = Entry(owner=profile, content=form.cleaned_data['content'], post_date=datetime.now(), reply_to = reply_to)
 	    entry.save()
 	    try:
 		entry.parse_post()
@@ -72,7 +77,7 @@ def postentry(request):
 	    except:
 		entry.delete()
 		raise
-	    next = urlresolvers.reverse('microblog_index', kwargs={'posted': '1'})
+	    next = urlresolvers.reverse('microblog_index')
 	    return HttpResponseRedirect(next + "?posted=1")
     else:
 	form = PostEntryForm()
@@ -90,7 +95,7 @@ def follow(request):
     if request.method == 'POST':
 	form = FollowForm(request.POST)
 	if form.is_valid():
-	    own_profile = Profile.get_or_create(request.user)
+	    own_profile = Profile.objects.get_or_create(user=request.user)[0]
 	    names = form.cleaned_data['users'].split(' ')
 	    newnames = []
 	    for name in names:
@@ -99,7 +104,7 @@ def follow(request):
 		    context['results'].append((name, 'No such user'))
 		    newnames.append(name)
 		else:
-		    profile = Profile.get_or_create(user[0])
+		    profile = Profile.objects.get_or_create(user=user[0])[0]
 		    profile.followers.add(own_profile)
 		    context['results'].append((name, 'Now followed'))
 	    if len(newnames):
@@ -114,9 +119,13 @@ def follow(request):
 
 def index(request):
     if request.user.is_authenticated():
+	profile = Profile.objects.get_or_create(user=request.user)[0]
 	context = {
-	    'profile': Profile.get_or_create(request.user),
+	    'profile': profile,
 	    'user': request.user,
+	    'own_entries': profile.entries.all()[:5],
+	    'feed_entries': profile.feed()[:5],
+	    'postform': PostEntryForm(),
 	}
 	return render_to_response('microblog/index_user.html', context)
     else:

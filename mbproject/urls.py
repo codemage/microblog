@@ -22,6 +22,8 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
 
+from django.conf import settings
+
 urlpatterns = patterns('',
     # Example:
     # (r'^mbproject/', include('mbproject.foo.urls')),
@@ -32,6 +34,9 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^admin/(.*)', admin.site.root),
+
+    # !!! DEVELOPMENT ONLY
+    (r'^media/(.*)', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT }),
 
     (r'^accounts/', include('registration.urls')),
     (r'', include('microblog.urls')),

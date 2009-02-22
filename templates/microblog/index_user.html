@@ -11,8 +11,12 @@
 {% block content %}
 
 <ul>
-    <li><a href="{% url microblog_watch_self %}">Your Feed</a></li>
-    <li><a href="{% url microblog_post %}">Post</a></li>
+    <li>Recent entries in your feed:
+	{% with feed_entries as entries %}
+	    {% include "microblog/entry_list.html" %}
+	{% endwith %}
+	<a href="{% url microblog_feed username=user.username %}">More...</a>
+    </li>
     <li>{% if profile.following.count %}
 	    You're following:
 	    {% for fp in profile.following.all %}
@@ -40,6 +44,19 @@
 	{% else %}
 	    You have no followers.
 	{% endif %}
+    </li>
+    <li><form method="post" action="{% url microblog_post %}">
+	<label for="id_content">Post New Entry:</label>
+	{{ postform.content }}
+	{{ postform.content.errors }}
+	<input type=submit value="Post"/>
+	</form>
+    </li>
+    <li> Your recent posts: <br/>
+	{% with own_entries as entries %}
+	    {% include "microblog/entry_list.html" %}
+	{% endwith %}
+	<a href="{% url microblog_profile username=user.username %}">More...</a>
     </li>
 </ul>
 
