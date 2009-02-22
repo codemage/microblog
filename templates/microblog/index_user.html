@@ -58,6 +58,7 @@
 	{% endwith %}
 	<a href="{% url microblog_profile username=user.username %}">More...</a>
     </li>
+    <li><a href="{% url auth_logout %}">Log out</a></li>
 </ul>
 
 {% endblock %}

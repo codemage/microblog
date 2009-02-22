@@ -148,5 +148,9 @@ def index(request):
 	}
 	return render_to_response('microblog/index_user.html', context)
     else:
-	return render_to_response('microblog/index_guest.html')
+	context = {
+	    'user': request.user,
+	    'entries': Entry.objects.all()[:20]
+	}
+	return render_to_response('microblog/index_guest.html', context)
 

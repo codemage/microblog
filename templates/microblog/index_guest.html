@@ -15,5 +15,7 @@
     <li><a href={% url auth_password_reset %}>Reset Password</a></li>
     <li><a href={% url registration_register %}>Register</a></li>
 </ul>
+Recent Activity:
+{% include "microblog/entry_list.html" %}
 {% endblock %}
 
