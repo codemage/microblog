@@ -32,9 +32,8 @@ class Profile(models.Model):
 
     def feed(self):
 	followed = Q(owner__followers = self)
-	replies = Q(reply_to__owner = self)
 	targeted = Q(targets = self)
-	return Entry.objects.filter(followed | replies | targeted)
+	return Entry.objects.filter(followed | targeted)
 
     def __unicode__(self):
 	return u'%s' % self.user.username
@@ -43,11 +42,10 @@ class Profile(models.Model):
 	ordering = [ 'user__username' ]
 
 class Entry(models.Model):
-    content = models.CharField(max_length=250)
+    content = models.CharField(max_length=140)
     post_date = models.DateTimeField('date posted')
     owner = models.ForeignKey(Profile, related_name='entries')
     targets = models.ManyToManyField(Profile, related_name='targeted_entries')
-    reply_to = models.ForeignKey('self', related_name='replies', null=True, blank=True, default=None)
 
     def get_tags(self):
 	return Tag.objects.get_for_object(self)
@@ -58,24 +56,14 @@ class Entry(models.Model):
 	Remove from the text any such words that appear at the beginning.
 	'''
 	words = self.content.split(' ')
-	keep = -1 # if changed, remove words before this
 	for i, word in enumerate(words):
 	    if word.startswith('@'):
-		if re.match(word, r'@\d+'): # reply to specific entry
-		    entries = Entry.objects.filter(pk = int(word[1:]))
-		    if len(entries) == 0:
-			continue # TODO: spit error
-		    self.reply_to = entries[0]
-		else:                       # reply to person
-		    users = Profile.objects.filter(user__username = word[1:])
-		    if len(users) == 0:
-			continue # TODO: spit error
-		    self.targets.add(users[0])
+		users = Profile.objects.filter(user__username = word[1:])
+		if len(users) == 0:
+		    continue # TODO: spit error
+		self.targets.add(users[0])
 	    elif word.startswith('#'):      # tag this entry
 		Tag.objects.add_tag(self, word[1:])
-	    elif keep == -1: # first non-special word is kept
-		keep = i
-	self.content = ' '.join(words[keep:])
 
     def __unicode__(self):
 	return u'%s says "%s" on %s' % (self.owner.user.username, self.content, self.post_date)

@@ -120,3 +120,6 @@ ACCOUNT_ACTIVATION_DAYS = 3
 # Tagging settings
 FORCE_LOWERCASE_TAGS = True
 
+# FastCGI settings
+FORCE_SCRIPT_NAME = ''
+

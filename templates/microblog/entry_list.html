@@ -9,11 +9,6 @@
 		 "{{ entry.content }}" -- {{ entry.post_date }}
 	    </div>
 	    {% endspaceless %}
-	    {% if entry.reply_to %}
-		<div>(Reply to
-		     <a href="{% url microblog_entry username=entry.reply_to.owner.user.username, id=entry.reply_to.id %}">
-		     @{{ entry.reply_to.id }}</a>): "{{ entry.reply_to.content }}"</div>
-	    {% endif %}
 	    {% if entry.tags %}
 		<div> Tags:
 		{% for tag in entry.tags %}
@@ -21,7 +16,6 @@
 		{% endfor %}
 		</div>
 	    {% endif %}
-	    {% include "microblog/reply_form.html" %}
 	</li>
     {% endfor %}
 {% else %}
