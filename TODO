@@ -4,4 +4,6 @@
 * Tagging stuff
 * XMPP interface
 * Link from activation completed to login or provide login form in-place (pre-fill username?)
+* (AJAX-y?) Follow links from user's profiles/posts
+* General AJAX/CSS prettification
 

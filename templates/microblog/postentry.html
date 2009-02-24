@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ title }} | {{ block.super }}
+Post New Entry | {{ block.super }}
 {% endblock %}
 
 {% block header %}
-<h1>Microblog Demo -- {{ title }} </h1>
+<h1>Microblog Demo -- Post New Entry </h1>
 {% endblock %}
 
 {% block content %}
-<form action="{{ formaction }}" method="POST">
+<form action="" method="POST">
     <table>
 	{{form.as_table}}
 	<tr><td colspan="2"><input type="submit"/></td></tr>

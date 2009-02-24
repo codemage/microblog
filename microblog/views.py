@@ -34,29 +34,6 @@ def feed(request, username):
     output = u'feed for %s' % username
     return HttpResponse(output)
 
-def showentry(request, username, id):
-    entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
-    entry.highlight = True
-
-    parents = []
-    cur = entry
-    while cur.reply_to is not None:
-	cur = cur.reply_to
-	parents.append(cur)
-    parents.reverse()
-
-    context = {
-	'user': request.user,
-	'entry': entry,
-	'parents': parents
-    }
-    return render_to_response("microblog/show_entry.html", context)
-
-def reply(request, username, id):
-    entry = get_object_or_404(Entry, owner__user__username=username, pk=id)
-
-    return postentry(request, entry)
-
 def profile(request, username):
     # parse request parameters
     page = request.REQUEST.get('page', 1)
@@ -76,12 +53,12 @@ def profile(request, username):
     return render_to_response('microblog/profile.html', context)
 
 @login_required
-def postentry(request, reply_to = None):
+def postentry(request):
     if request.method == 'POST':
 	form = PostEntryForm(request.POST)
 	if form.is_valid():
 	    profile = Profile.objects.get_or_create(user=request.user)[0]
-	    entry = Entry(owner=profile, content=form.cleaned_data['content'], post_date=datetime.now(), reply_to = reply_to)
+	    entry = Entry(owner=profile, content=form.cleaned_data['content'], post_date=datetime.now())
 	    entry.save()
 	    try:
 		entry.parse_post()
@@ -94,14 +71,7 @@ def postentry(request, reply_to = None):
     else:
 	form = PostEntryForm()
 
-    formaction = ""
-    title = "Post New Entry"
-    if reply_to is not None:
-	formaction = urlresolvers.reverse('microblog_entry_reply', kwargs=
-	    {'username': reply_to.owner.user.username, 'id': reply_to.id})
-	title = "Reply to Entry %s" % reply_to.id
-
-    return render_to_response('microblog/postentry.html', { 'form': form, 'formaction': formaction, 'title': title })
+    return render_to_response('microblog/postentry.html', { 'form': form })
 
 @login_required
 def watch_self(request):

@@ -22,8 +22,6 @@ from microblog import views
 
 urlpatterns = patterns('',
     url(r'^users/(?P<username>.*)/feed/$', views.feed, name='microblog_feed'),
-    url(r'^users/(?P<username>.*)/(?P<id>\d+)/$', views.showentry, name='microblog_entry'),
-    url(r'^users/(?P<username>.*)/(?P<id>\d+)/reply$', views.reply, name='microblog_entry_reply'),
     url(r'^users/(?P<username>.*)/$', views.profile, name='microblog_profile'),
     url(r'^watch/$', views.watch_self, name='microblog_watch_self'),
     url(r'^post/$', views.postentry, name='microblog_post'),
