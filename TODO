@@ -2,8 +2,11 @@
 * User feed detail page
 * Pagination for entry list detail pages (feed and per-user)
 * Tagging stuff
-* XMPP interface
 * Link from activation completed to login or provide login form in-place (pre-fill username?)
 * (AJAX-y?) Follow links from user's profiles/posts
 * General AJAX/CSS prettification
+* Reasonably detailed setup/installation instructions
+* XMPP bot
+* XMPP pubsub interface improvements
+* Federation via XMPP pubsub
 

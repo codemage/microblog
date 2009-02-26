@@ -20,5 +20,13 @@ To use this app, you will need:
  * django-registration 0.7 or later
  * django-tagging 0.3 or later
    (or pre-0.3 dev checkout until 0.3 is released)
+ * PostgreSQL
+ * psycopg2
 
+For the XMPP functionality, you'll also need:
+
+ * Twisted, version 8.2.0 or later recommended
+ * PyPgSQL (python-pgsql package on ubuntu)
+ * Wokkel 0.4.0 or later
+ * Idavoll
 

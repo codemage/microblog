@@ -1,4 +1,7 @@
-""" Copyright (c) 2009 Walter Mundt
+"""
+    TAC for Idavoll for use in microblog app
+
+    Copyright (c) 2009 Walter Mundt
 
     This file is part of microblogging-demo.
 
@@ -16,17 +19,28 @@
     along with microblogging-demo.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from django.conf.urls.defaults import *
+from twisted.application import service
+from twisted.words.protocols.jabber.jid import JID
 
-from microblog import views
+from microblog.xmpp import tap
 
-urlpatterns = patterns('',
-    url(r'^users/(?P<username>.*)/(?P<postid>\d+)/$', views.profile, name='microblog_focus_post'),
-    url(r'^users/(?P<username>.*)/feed/$', views.feed, name='microblog_feed'),
-    url(r'^users/(?P<username>.*)/$', views.profile, name='microblog_profile'),
-    url(r'^watch/$', views.watch_self, name='microblog_watch_self'),
-    url(r'^post/$', views.postentry, name='microblog_post'),
-    url(r'^follow/$', views.follow, name='microblog_follow'),
-    url(r'^$', views.index, name='microblog_index'),
-)
+config = {
+    'jid': JID('pubsub.lerran.apogean.org'),
+    'secret': 'secret',
+    'rhost': '127.0.0.1',
+    'rport': 5347,
+    'backend': 'pgsql',
+    'verbose': True,
+    'hide-nodes': False,
+    'rpcport': 8086,
+    'dbuser': 'microblog',
+    'dbpass': 'secret',
+    'dbname': 'pubsub',
+    'dbhost': 'localhost',
+    'dbport': 5432
+}
+
+application = service.Application("Microblog-pubsub")
+idavollService = tap.makeService(config)
+idavollService.setServiceParent(application)
 

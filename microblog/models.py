@@ -19,12 +19,23 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth import models as auth_models
+from django.core import exceptions
+from django.conf import settings
+from django.template import Context, loader
 
 import tagging
 from tagging.fields import TagField
 from tagging.models import Tag
 
 import re
+
+import xmlrpclib
+
+try:
+    idavoll = xmlrpclib.ServerProxy(settings.IDAVOLL_XMLRPC_SERVICE)
+except KeyError:
+    raise exceptions.ImproperlyConfigured(
+	'microblog-demo needs IDAVOLL_XMLRPC_SERVICE in settings.py')
 
 class Profile(models.Model):
     followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
@@ -64,6 +75,32 @@ class Entry(models.Model):
 		self.targets.add(users[0])
 	    elif word.startswith('#'):      # tag this entry
 		Tag.objects.add_tag(self, word[1:])
+
+    def publish(self):
+	username = self.owner.user.username
+	entryDetails = Context({
+	    'text': self.content,
+	    'id': self.id,
+	    'date': self.post_date.isoformat(),
+	    'author': username,
+	    'tags': [tag.name for tag in self.tags]
+	})
+	template = loader.get_template("microblog/entry.atom")
+	atomxml = unicode(template.render(entryDetails))
+
+	print "Publishing %s" % self.id
+	print atomxml
+
+	try:
+	    # TODO: don't resend this, split off on the other end after parsing once!
+	    idavoll.publish('user/%s' % username, str(self.id), atomxml)
+	    for follower in self.owner.followers.all():
+		idavoll.publish('feed/%s' % follower.user.username, str(self.id), atomxml)
+	    for tag in self.tags:
+		idavoll.publish('tag/%s' % tag.name, str(self.id), atomxml)
+	except xmlrpclib.Fault, f:
+	    print "publishing entry %s: %s" % (self.id, f)
+	    #ignore
 
     def __unicode__(self):
 	return u'%s says "%s" on %s' % (self.owner.user.username, self.content, self.post_date)

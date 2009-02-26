@@ -1,0 +1,16 @@
+<entry xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ text }}</title>
+  <link href="{% url microblog_focus_post username=author,postid=id %}"/>
+  <id>{% url microblog_focus_post username=author,postid=id %}</id>
+  <updated>{{ date }}</updated>
+  <published>{{ date }}</published>
+  <summary>{{ text }}</summary>
+  <author>
+    <name>{{ username }}</name>
+    <uri>{% url microblog_profile username=author %}</uri>
+  </author>
+  {% for tag in tags %}
+  <category term="{{ tag }}" scheme="urn:tag"/>
+  {% endfor %}
+</entry>
+

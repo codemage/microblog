@@ -63,9 +63,11 @@ def postentry(request):
 	    try:
 		entry.parse_post()
 		entry.save()
+		entry.publish()
 	    except:
 		entry.delete()
 		raise
+
 	    next = urlresolvers.reverse('microblog_index')
 	    return HttpResponseRedirect(next + "?posted=1")
     else:

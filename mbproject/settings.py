@@ -26,17 +26,19 @@ ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
+IDAVOLL_XMLRPC_SERVICE = "http://localhost:8086/"
+
 ROOT = '/home/codemage/work/microblog/'
-WEB_ROOT = 'http://lerran.apogean.org/microblog/'
+WEB_ROOT = 'http://lerran.apogean.org:8000/'
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = ROOT + '.sqlite3.db' # Or path to database file if using sqlite3.
-DATABASE_USER = ''             # Not used with sqlite3.
-DATABASE_PASSWORD = ''         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+DATABASE_ENGINE = 'postgresql_psycopg2' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_NAME = 'microblog' # Or path to database file if using sqlite3.
+DATABASE_USER = 'microblog'       # Not used with sqlite3.
+DATABASE_PASSWORD = 'secret'  # Not used with sqlite3.
+DATABASE_HOST = 'localhost'             # Set to empty string for localhost. Not used with sqlite3.
+DATABASE_PORT = '5432'             # Set to empty string for default. Not used with sqlite3.
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
