@@ -25,7 +25,7 @@ from twisted.words.protocols.jabber.jid import JID
 from microblog.xmpp import tap
 
 config = {
-    'jid': JID('pubsub.lerran.apogean.org'),
+    'jid': JID('pubsub.example.org'),
     'secret': 'secret',
     'rhost': '127.0.0.1',
     'rport': 5347,
@@ -37,7 +37,9 @@ config = {
     'dbpass': 'secret',
     'dbname': 'pubsub',
     'dbhost': 'localhost',
-    'dbport': 5432
+    'dbport': 5432,
+    'botjid': 'microblog@example.org',
+    'botpass': 'secret'
 }
 
 application = service.Application("Microblog-pubsub")

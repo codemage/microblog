@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     url(r'^watch/$', views.watch_self, name='microblog_watch_self'),
     url(r'^post/$', views.postentry, name='microblog_post'),
     url(r'^follow/$', views.follow, name='microblog_follow'),
+    url(r'^editprofile/$', views.editprofile, name='microblog_editprofile'),
     url(r'^$', views.index, name='microblog_index'),
 )
 

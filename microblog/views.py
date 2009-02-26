@@ -28,13 +28,13 @@ from django.contrib.auth.decorators import login_required
 from tagging.models import Tag
 
 from microblog.models import Profile, Entry
-from microblog.forms import PostEntryForm, FollowForm
+from microblog.forms import PostEntryForm, FollowForm, EditProfileForm
 
 def feed(request, username):
     output = u'feed for %s' % username
     return HttpResponse(output)
 
-def profile(request, username):
+def profile(request, username, focuspostid = None):
     # parse request parameters
     page = request.REQUEST.get('page', 1)
     pagesize = request.REQUEST.get('pagesize', 40)
@@ -108,6 +108,22 @@ def follow(request):
     context['form'] = form
     return render_to_response('microblog/follow.html', context)
 
+@login_required
+def editprofile(request):
+    if request.method == 'POST':
+	form = EditProfileForm(request.POST)
+	if form.is_valid():
+	    own_profile = Profile.objects.get_or_create(user=request.user)[0]
+	    own_profile.jid = form.cleaned_data['jid']
+	    own_profile.save()
+
+	    return HttpResponseRedirect(urlresolvers.reverse('microblog_index'))
+    else:
+        form = EditProfileForm()
+
+    context = { 'form': form }
+    return render_to_response('microblog/editprofile.html', context)
+
 def index(request):
     if request.user.is_authenticated():
 	profile = Profile.objects.get_or_create(user=request.user)[0]
@@ -117,6 +133,7 @@ def index(request):
 	    'own_entries': profile.entries.all()[:5],
 	    'feed_entries': profile.feed()[:5],
 	    'postform': PostEntryForm(),
+	    'editform': EditProfileForm({'jid': profile.jid}),
 	}
 	return render_to_response('microblog/index_user.html', context)
     else:

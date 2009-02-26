@@ -23,11 +23,13 @@ from twisted.web import server
 
 from idavoll import gateway, tap
 
-from microblog.xmpp import idavoll_xmlrpc
+from microblog.xmpp import idavoll_xmlrpc, bot
 
 class Options(tap.Options):
     optParameters = [
             ('rpcport', None, '8086', 'XML-RPC port'),
+	    ('botjid', None, 'microblog@example.org', 'XMPP Bot username'),
+	    ('botpass', None, 'secret', 'XMPP Bot password'),
     ]
 
 def getManholeFactory(namespace, **passwords):
@@ -48,8 +50,12 @@ def makeService(config):
     bs = s.getServiceNamed('backend')
     cs = s.getServiceNamed('component')
 
+    # Set up XMPP bot
+    botClient, botInstance = bot.getBot(config['botjid'], config['botpass'], True)
+    botClient.setServiceParent(s)
+
     # Set up XMLRPC service
-    xmlrpc = idavoll_xmlrpc.XMLRPC(bs, config['jid'])
+    xmlrpc = idavoll_xmlrpc.XMLRPC(bs, config['jid'], botInstance)
     site = server.Site(xmlrpc)
     w = internet.TCPServer(int(config['rpcport']), site, interface='localhost')
     w.setServiceParent(s)
@@ -58,7 +64,8 @@ def makeService(config):
     namespace = {'service': s,
                  'component': cs,
                  'backend': bs,
-                 'xmlrpc': xmlrpc}
+                 'xmlrpc': xmlrpc,
+		 'bot': botInstance}
 
     f = getManholeFactory(namespace, admin='admin!pass')
     manholeService = strports.service('2222', f)

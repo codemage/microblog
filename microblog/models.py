@@ -40,6 +40,7 @@ except KeyError:
 class Profile(models.Model):
     followers = models.ManyToManyField('self', related_name='following', symmetrical=False)
     user = models.OneToOneField(auth_models.User, related_name='microblog_profile')
+    jid = models.CharField(max_length="255", blank=True)
 
     def feed(self):
 	followed = Q(owner__followers = self)
@@ -63,8 +64,6 @@ class Entry(models.Model):
 
     def parse_post(self):
 	''' parse_post(): Parse a post for @target and #tag syntax
-
-	Remove from the text any such words that appear at the beginning.
 	'''
 	words = self.content.split(' ')
 	for i, word in enumerate(words):
@@ -77,6 +76,9 @@ class Entry(models.Model):
 		Tag.objects.add_tag(self, word[1:])
 
     def publish(self):
+	''' publish(): Publish entry to XMPP Pubsub over XMLRPC to idavoll
+	'''
+	
 	username = self.owner.user.username
 	entryDetails = Context({
 	    'text': self.content,
@@ -87,6 +89,7 @@ class Entry(models.Model):
 	})
 	template = loader.get_template("microblog/entry.atom")
 	atomxml = unicode(template.render(entryDetails))
+	message = loader.get_template("microblog/entry.message").render(entryDetails)
 
 	print "Publishing %s" % self.id
 	print atomxml
@@ -96,6 +99,8 @@ class Entry(models.Model):
 	    idavoll.publish('user/%s' % username, str(self.id), atomxml)
 	    for follower in self.owner.followers.all():
 		idavoll.publish('feed/%s' % follower.user.username, str(self.id), atomxml)
+		if follower.jid:
+		    idavoll.message(follower.jid, unicode(message))
 	    for tag in self.tags:
 		idavoll.publish('tag/%s' % tag.name, str(self.id), atomxml)
 	except xmlrpclib.Fault, f:

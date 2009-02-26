@@ -28,14 +28,15 @@ from idavoll import error
 
 class XMLRPC(xmlrpc.XMLRPC):
 
-    def __init__(self, backend, owner):
+    def __init__(self, backend, owner, bot=None):
 	xmlrpc.XMLRPC.__init__(self)
 	self.backend = backend
 	self.owner = owner
+	self.bot = bot
 
     @inlineCallbacks
     def xmlrpc_create(self, nodeid):
-	print "Creating node %s..." % nodeid
+	print "[XMLRPC] Creating node %s..." % nodeid
 	realnodeid = yield self.backend.createNode(nodeid, self.owner)
 	returnValue(realnodeid)
 
@@ -49,4 +50,14 @@ class XMLRPC(xmlrpc.XMLRPC):
 
 	yield self.backend.publish(nodeid, items, self.owner)
 	returnValue(nodeid)
+
+    def xmlrpc_message(self, target, text):
+	target = unicode(jid.JID(target))
+	if self.bot:
+	    print "[XMLRPC] Sending '%s' to %s" % (text, target)
+	    self.bot.sendMessage(target, text)
+	    return True
+	else:
+	    print "[XMLRPC] Ignoring message request because no bot"
+	return False
 

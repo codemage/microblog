@@ -58,6 +58,13 @@
 	{% endwith %}
 	<a href="{% url microblog_profile username=user.username %}">More...</a>
     </li>
+    <li><form method="post" action="{% url microblog_editprofile %}">
+	<label for="id_jid">Set XMPP Account:</label>
+	{{ editform.jid }}
+	{{ editform.jid.errors }}
+	<input type="submit" value="Set Linked XMPP Account"/>
+	</form>
+    </li>
     <li><a href="{% url auth_logout %}">Log out</a></li>
 </ul>
 
