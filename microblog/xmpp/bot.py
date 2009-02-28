@@ -16,10 +16,13 @@
     along with microblogging-demo.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import urllib
+
 from twisted.words.xish import domish
 from twisted.application import service
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.words.protocols.jabber import jid
+from twisted.web.client import getPage
 
 from wokkel import pubsub, client, xmppim
 
@@ -40,6 +43,7 @@ class BotMessageProtocol(xmppim.MessageProtocol):
 
     @inlineCallbacks
     def connectionInitialized(self):
+	xmppim.MessageProtocol.connectionInitialized(self)
 	print "[MessageBot] Connected %s" % self.ownjid
 	
 	self.roster = yield self.rosterProt.getRoster()
@@ -56,6 +60,23 @@ class BotMessageProtocol(xmppim.MessageProtocol):
 	msg.addElement('body', content=body)
 
 	self.send(msg)
+    
+    @inlineCallbacks
+    def onMessage(self, msg):
+	print "[MessageBot] Got message %s" + msg.toXml()
+	if not msg.hasAttribute('type') or not hasattr(msg, 'body') or msg['type'] != 'chat':
+	    return
+	
+	fromjid = jid.JID(msg['from']).userhost()
+
+	text = str(msg.body)
+	if text.startswith('!'):
+	    return # ignore commands for now
+
+	print "[MessageBot] Got message '%s' from %s" % (text, msg['from'])
+	
+	postdata = urllib.urlencode({'jid': fromjid, 'content': text, 'secret': 'SECRET!'})
+	yield getPage('http://localhost:8000/_post/', method='POST', postdata=postdata)
 
 def getBot(botjid, botpass, logTraffic):
     botjid = jid.internJID(botjid)
@@ -69,7 +90,6 @@ def getBot(botjid, botpass, logTraffic):
     rosterProt.setHandlerParent(xmppclient)
     messageBot = BotMessageProtocol(botjid, presenceProt, rosterProt)
     messageBot.setHandlerParent(xmppclient)
-    BotPresenceProtocol().setHandlerParent(xmppclient)
 
     return xmppclient, messageBot
 

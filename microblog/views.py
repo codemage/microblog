@@ -18,7 +18,7 @@
 
 from datetime import datetime
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core import urlresolvers
 
@@ -51,6 +51,23 @@ def profile(request, username, focuspostid = None):
 	'entries': entries,
     }
     return render_to_response('microblog/profile.html', context)
+
+def postinternal(request):
+    if request.method != 'POST' or 'secret' not in request.POST or request.POST['secret'] != 'SECRET!':
+	raise Http404()
+
+    profile = get_object_or_404(Profile, jid=request.POST['jid'])
+    entry = Entry(owner=profile, content=request.POST['content'], post_date=datetime.now())
+    entry.save()
+    try:
+	entry.parse_post()
+	entry.save()
+	entry.publish()
+    except:
+	entry.delete()
+	raise
+
+    return HttpResponse('OK')
 
 @login_required
 def postentry(request):
